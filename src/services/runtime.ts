@@ -111,6 +111,12 @@ export function getApiBaseUrl(): string {
 }
 
 export function getRemoteApiBaseUrl(): string {
+  // Self-host: explicit base URL (browser same-origin when empty)
+  const apiBase = import.meta.env.VITE_API_BASE_URL;
+  if (apiBase && typeof apiBase === 'string' && apiBase.trim() !== '') {
+    return normalizeBaseUrl(apiBase.trim());
+  }
+
   const configuredRemoteBase = import.meta.env.VITE_TAURI_REMOTE_API_BASE_URL;
   if (configuredRemoteBase) {
     return normalizeBaseUrl(configuredRemoteBase);
@@ -119,8 +125,8 @@ export function getRemoteApiBaseUrl(): string {
   const fromHosts = DEFAULT_REMOTE_HOSTS[SITE_VARIANT] ?? DEFAULT_REMOTE_HOSTS.full ?? '';
   if (fromHosts) return fromHosts;
 
-  // Desktop builds may not set VITE_WS_API_URL; default to production.
-  if (isDesktopRuntime()) return 'https://worldmonitor.app';
+  // Desktop: no hardcoded cloud fallback; use Tauri remote or empty (no leak to worldmonitor.app)
+  if (isDesktopRuntime()) return '';
   return '';
 }
 
@@ -153,7 +159,7 @@ const APP_HOSTS = new Set([
   'api.worldmonitor.app',
   'localhost',
   '127.0.0.1',
-  ...extractHostnames(WS_API_URL, import.meta.env.VITE_WS_RELAY_URL),
+  ...extractHostnames(WS_API_URL, import.meta.env.VITE_WS_RELAY_URL, import.meta.env.VITE_API_BASE_URL),
 ]);
 
 function isAppOriginUrl(urlStr: string): boolean {

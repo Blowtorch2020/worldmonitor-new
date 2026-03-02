@@ -25,6 +25,8 @@ export const STOP_WORDS = new Set([
 // Correlation constants
 export const PREDICTION_SHIFT_THRESHOLD = 5;
 export const MARKET_MOVE_THRESHOLD = 2;
+/** Weight for prediction-market (e.g. Polymarket) in composite signals; demoted to confirming-only (low). Self-host: set VITE_POLYMARKET_WEIGHT=0.1 in build. */
+export const POLYMARKET_CII_WEIGHT = 0.15;
 export const NEWS_VELOCITY_THRESHOLD = 3;
 export const FLOW_PRICE_THRESHOLD = 1.5;
 export const ENERGY_COMMODITY_SYMBOLS = new Set(['CL=F', 'NG=F']);

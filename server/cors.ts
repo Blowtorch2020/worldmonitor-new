@@ -19,18 +19,30 @@ const DEV_PATTERNS: RegExp[] = [
   /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
 ];
 
+const CORS_EXTRA_ORIGINS = (process.env.CORS_EXTRA_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const EXTRA_ORIGIN_PATTERNS: RegExp[] = CORS_EXTRA_ORIGINS.map(
+  (o) => new RegExp(`^${o.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`)
+);
+const CORS_DEFAULT_ORIGIN = process.env.CORS_DEFAULT_ORIGIN || '';
+
 const ALLOWED_ORIGIN_PATTERNS: RegExp[] =
   process.env.NODE_ENV === 'production'
     ? PRODUCTION_PATTERNS
     : [...PRODUCTION_PATTERNS, ...DEV_PATTERNS];
 
 function isAllowedOrigin(origin: string): boolean {
-  return Boolean(origin) && ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin));
+  if (!origin) return false;
+  if (ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin))) return true;
+  if (EXTRA_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin))) return true;
+  return false;
 }
 
 export function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') || '';
-  const allowOrigin = isAllowedOrigin(origin) ? origin : 'https://worldmonitor.app';
+  const allowOrigin = isAllowedOrigin(origin) ? origin : CORS_DEFAULT_ORIGIN;
   return {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',

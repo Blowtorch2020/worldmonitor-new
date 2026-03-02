@@ -1,0 +1,13 @@
+{
+  "_comment": "Optional country baseline overrides. When present, scoring can use these instead of hard-coded CURATED_COUNTRIES. Keys: ISO 3166-1 alpha-2. baselineRisk 0-100, eventMultiplier typically 0.3-3.0.",
+  "US": { "baselineRisk": 5, "eventMultiplier": 0.3 },
+  "RU": { "baselineRisk": 35, "eventMultiplier": 2.0 },
+  "CN": { "baselineRisk": 25, "eventMultiplier": 2.5 },
+  "UA": { "baselineRisk": 50, "eventMultiplier": 0.8 },
+  "IR": { "baselineRisk": 40, "eventMultiplier": 2.0 },
+  "IL": { "baselineRisk": 45, "eventMultiplier": 0.7 },
+  "TW": { "baselineRisk": 30, "eventMultiplier": 1.5 },
+  "KP": { "baselineRisk": 45, "eventMultiplier": 3.0 },
+  "SA": { "baselineRisk": 20, "eventMultiplier": 2.0 },
+  "TR": { "baselineRisk": 25, "eventMultiplier": 1.2 }
+}

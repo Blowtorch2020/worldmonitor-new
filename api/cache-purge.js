@@ -108,7 +108,7 @@ export default async function handler(req) {
   }
 
   const auth = req.headers.get('authorization') || '';
-  const secret = process.env.RELAY_SHARED_SECRET;
+  const secret = process.env.CACHE_PURGE_SECRET || process.env.RELAY_SHARED_SECRET;
   if (!secret || !(await timingSafeEqual(auth, `Bearer ${secret}`))) {
     return json({ error: 'Unauthorized' }, 401, corsHeaders);
   }

@@ -443,7 +443,13 @@ export class LiveNewsPanel extends Panel {
 
   private get embedOrigin(): string {
     if (isDesktopRuntime()) return `http://localhost:${getLocalApiPort()}`;
-    try { return new URL(getRemoteApiBaseUrl()).origin; } catch { return 'https://worldmonitor.app'; }
+    try {
+        const base = getRemoteApiBaseUrl();
+        if (base) return new URL(base).origin;
+        return typeof window !== 'undefined' ? window.location.origin : '';
+      } catch {
+        return typeof window !== 'undefined' ? window.location.origin : '';
+      }
   }
 
   private setupBridgeMessageListener(): void {
@@ -480,27 +486,31 @@ export class LiveNewsPanel extends Panel {
   }
 
   private static resolveYouTubeOrigin(): string | null {
-    const fallbackOrigin = SITE_VARIANT === 'tech'
-      ? 'https://worldmonitor.app'
-      : 'https://worldmonitor.app';
+    const configuredOrigin = (() => {
+      try {
+        const base = getRemoteApiBaseUrl();
+        if (base) return new URL(base).origin;
+      } catch {}
+      return null;
+    })();
 
     try {
       const { protocol, origin, host } = window.location;
       if (protocol === 'http:' || protocol === 'https:') {
         // Desktop webviews commonly run from tauri.localhost which can trigger
-        // YouTube embed restrictions. Use canonical public origin instead.
+        // YouTube embed restrictions. Use configured origin or current origin.
         if (host === 'tauri.localhost' || host.endsWith('.tauri.localhost')) {
-          return fallbackOrigin;
+          return configuredOrigin ?? origin;
         }
         return origin;
       }
       if (protocol === 'tauri:' || protocol === 'asset:') {
-        return fallbackOrigin;
+        return configuredOrigin ?? origin;
       }
     } catch {
       // Ignore invalid location values.
     }
-    return fallbackOrigin;
+    return configuredOrigin ?? (typeof window !== 'undefined' ? window.location.origin : '');
   }
 
   private setupIdleDetection(): void {

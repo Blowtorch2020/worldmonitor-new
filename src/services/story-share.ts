@@ -1,6 +1,14 @@
 import type { StoryData } from './story-data';
+import { getRemoteApiBaseUrl } from './runtime';
 
-// Deep link generator for story sharing
+function getStoryApiBase(): string {
+  const base = getRemoteApiBaseUrl();
+  if (base) return base.replace(/\/$/, '');
+  if (typeof window !== 'undefined') return window.location.origin;
+  return '';
+}
+
+// Deep link generator for story sharing (uses same-origin or VITE_API_BASE_URL for self-host)
 export function generateStoryDeepLink(
   countryCode: string,
   type: 'ciianalysis' | 'convergence' | 'brief' = 'ciianalysis',
@@ -14,7 +22,8 @@ export function generateStoryDeepLink(
   });
   if (score !== undefined) params.set('s', String(score));
   if (level) params.set('l', level);
-  return `https://worldmonitor.app/api/story?${params.toString()}`;
+  const apiBase = getStoryApiBase();
+  return apiBase ? `${apiBase}/api/story?${params.toString()}` : `/api/story?${params.toString()}`;
 }
 
 // Parse deep link parameters

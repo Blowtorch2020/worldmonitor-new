@@ -1,7 +1,7 @@
 
 import { Panel } from './Panel';
 import { t } from '@/services/i18n';
-import { getLocalApiPort, isDesktopRuntime } from '@/services/runtime';
+import { getLocalApiPort, getRemoteApiBaseUrl, isDesktopRuntime } from '@/services/runtime';
 import {
   getDesktopReadinessChecks,
   getKeyBackedAvailabilitySummary,
@@ -129,7 +129,8 @@ export class ServiceStatusPanel extends Panel {
     }
 
     const port = this.localBackend.port ?? getLocalApiPort();
-    const remote = this.localBackend.remoteBase ?? 'https://worldmonitor.app';
+    const base = this.localBackend.remoteBase ?? getRemoteApiBaseUrl();
+    const remote = base || 'same-origin';
 
     return h('div', { className: 'service-status-backend' },
       'Local backend active on ', h('strong', null, `127.0.0.1:${port}`),

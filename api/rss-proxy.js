@@ -391,17 +391,20 @@ export default async function handler(req) {
       return response;
     };
 
+    const allowRelayFallback = process.env.RSS_PROXY_LOCAL_ONLY !== 'true' && process.env.RSS_PROXY_ALLOW_RELAY_FALLBACK !== 'false';
     let response;
     let usedRelay = false;
     try {
       response = await fetchDirect();
     } catch (directError) {
-      response = await fetchViaRailway(feedUrl, timeout);
-      usedRelay = !!response;
+      if (allowRelayFallback) {
+        response = await fetchViaRailway(feedUrl, timeout);
+        usedRelay = !!response;
+      }
       if (!response) throw directError;
     }
 
-    if (!response.ok && !usedRelay) {
+    if (!response.ok && !usedRelay && allowRelayFallback) {
       const relayResponse = await fetchViaRailway(feedUrl, timeout);
       if (relayResponse && relayResponse.ok) {
         response = relayResponse;
